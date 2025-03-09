@@ -88,21 +88,21 @@ end
 function lhs_equals_rhs_interpolate(lhs::Array{Float64, 3}, rhs::Array{Float64, 2})::Tuple{Array{Int64, 3}, Array{Float64, 3}}
     pi        = similar(lhs)
     a_end_idx = Int.(floor.(lhs))
-    for z in 1:size(lhs)[3]
+    for z in 1:size(lhs)[1]
         for i in 1:size(lhs)[2]
             for j in 1:size(rhs)[2]
-                indx = searchsortedlast(lhs[:,i,z] .- rhs[:,j], 0, lt= >) # find idx of first a that is bigger than true a
+                indx = searchsortedlast(lhs[z,i,:] .- rhs[:,j], 0, lt= >) # find idx of first a that is bigger than true a
                 if indx ==0
-                    a_end_idx[j,i,z] = max(indx,1)
-                    pi[j,i,z] = 1
+                    a_end_idx[z,i,j] = max(indx,1)
+                    pi[z,i,j] = 1
                 elseif indx==size(rhs)[2]
-                    a_end_idx[j,i,z] = min(size(rhs)[2]-1,indx)
-                    pi[j,i,z] = 0
+                    a_end_idx[z,i,j] = min(size(rhs)[2]-1,indx)
+                    pi[z,i,j] = 0
                 else
-                    err_upper = rhs[indx+1, j] - lhs[indx+1,i,z]
-                    err_lower = rhs[indx, j]   - lhs[indx,i,z]
-                    pi[j,i,z] = err_upper / (err_upper - err_lower)
-                    a_end_idx[j,i,z] = indx
+                    err_upper = rhs[indx+1, j] - lhs[z,i,indx+1]
+                    err_lower = rhs[indx, j]   - lhs[z,i,indx]
+                    pi[z,i,j] = err_upper / (err_upper - err_lower)
+                    a_end_idx[z,i,j] = indx
                 end 
             end
         end
